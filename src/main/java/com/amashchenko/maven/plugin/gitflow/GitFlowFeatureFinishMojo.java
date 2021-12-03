@@ -30,7 +30,7 @@ import org.codehaus.plexus.util.cli.CommandLineException;
 
 /**
  * The git flow feature finish mojo.
- * 
+ *
  */
 @Mojo(name = "feature-finish", aggregator = true)
 public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
@@ -41,7 +41,7 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
 
     /**
      * Whether to skip calling Maven test goal before merging the branch.
-     * 
+     *
      * @since 1.0.5
      */
     @Parameter(property = "skipTestProject", defaultValue = "false")
@@ -50,7 +50,7 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
     /**
      * Whether to squash feature branch commits into a single commit upon
      * merging.
-     * 
+     *
      * @since 1.2.3
      */
     @Parameter(property = "featureSquash", defaultValue = "false")
@@ -58,7 +58,7 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
 
     /**
      * Whether to push to the remote.
-     * 
+     *
      * @since 1.3.0
      */
     @Parameter(property = "pushRemote", defaultValue = "true")
@@ -66,7 +66,7 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
 
     /**
      * Feature name, without feature branch prefix, to use in non-interactive mode.
-     * 
+     *
      * @since 1.9.0
      */
     @Parameter(property = "featureName")
@@ -76,7 +76,7 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
      * Feature branch to use in non-interactive mode. Must start with feature branch
      * prefix. The featureBranch parameter will be used instead of
      * {@link #featureName} if both are set.
-     * 
+     *
      * @since 1.16.0
      */
     @Parameter(property = "featureBranch")
@@ -201,8 +201,16 @@ public class GitFlowFeatureFinishMojo extends AbstractGitFlowMojo {
             if (featureSquash) {
                 // git merge --squash feature/...
                 gitMergeSquash(featureBranchName);
-                gitCommit(StringUtils.isBlank(commitMessages.getFeatureSquashMessage()) ? featureBranchName
-                        : commitMessages.getFeatureSquashMessage());
+
+                Map<String, String> properties = new HashMap<String, String>();
+                properties.put("version", version);
+                properties.put("featureName", featName);
+
+                String featureSquashMessage = "Merge branch '" + featureBranchName + "' into develop";
+                if (StringUtils.isNotBlank(commitMessages.getFeatureSquashMessage())) {
+                    featureSquashMessage = commitMessages.getFeatureSquashMessage();
+                }
+                gitCommit(featureSquashMessage, properties);
             } else {
                 Map<String, String> properties = new HashMap<String, String>();
                 properties.put("version", version);
